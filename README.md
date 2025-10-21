@@ -1,4 +1,4 @@
-> [نسخه فارسی اینجاست](./README_FA.md)
+ [نسخه فارسی اینجاست](./README_FA.md)
 
 # Shahmoradi Bot
 
