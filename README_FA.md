@@ -97,4 +97,5 @@ active_bets.json
 
 **امیرحسین مدنی**
 Telegram: [@The_Madani](https://t.me/The_Madani)
+
 Powered by freedom, not licenses.
