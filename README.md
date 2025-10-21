@@ -98,5 +98,5 @@ active_bets.json
 ## Developer
 
 **Amirhossein Madani**
-Telegram: [@TheـMadani](https://t.me/TheـMadani)
+Telegram: [@The_Madani](https://t.me/The_Madani)
 Powered by freedom, not licenses.
