@@ -100,4 +100,6 @@ active_bets.json
 **Amirhossein Madani**
 Telegram: [@The_Madani](https://t.me/The_Madani)
 
+Note: This project is still active and under development.
+
 Powered by freedom, not licenses.
