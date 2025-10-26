@@ -110,7 +110,6 @@ sudo systemctl enable --now shahmoradi.service
 | `/start`         | آغاز و ثبت کاربر         |
 | `/help`          | نمایش فهرست دستورات      |
 | `/bet <amount>`  | ثبت شرط                  |
-| `/box`           | اجرای بازی جعبه          |
 | `/ai <question>` | پرسش از ماژول هوش مصنوعی |
 
 ---
@@ -155,7 +154,3 @@ journalctl -u shahmoradi -f
 ## لایسنس
 
 MIT License
-
----
-
-می‌خوای برات نسخه انگلیسی بین‌المللی‌ش هم بسازم (برای نمایش حرفه‌ای‌تر در GitHub)؟
