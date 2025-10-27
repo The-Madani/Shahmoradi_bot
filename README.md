@@ -29,22 +29,22 @@
 ```bash
 git clone https://github.com/The-Madani/Shahmoradi_bot.git
 cd Shahmoradi_bot
-
+```
 2. ساخت محیط مجازی و نصب وابستگی‌ها
-
+```bash
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-
+```
 3. پیکربندی
 
 در فایل .env یا config.py مقادیر زیر را تنظیم کنید:
-
+```python
 BOT_TOKEN="توکن_ربات"
 ADMIN_IDS="123456789,987654321"
 DATABASE_URL="sqlite:///data.db"
 LOG_LEVEL="INFO"
-
+```
 4. اجرا
 
 python main.py
@@ -55,7 +55,7 @@ python main.py
 اجرای خودکار با systemd
 
 فایل زیر را در مسیر /etc/systemd/system/shahmoradi.service ایجاد کنید:
-
+```bash
 [Unit]
 Description=Shahmoradi Telegram Bot
 After=network.target
@@ -70,12 +70,12 @@ RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
-
+```
 سپس:
-
+```bash
 sudo systemctl daemon-reload
 sudo systemctl enable --now shahmoradi.service
-
+```
 
 ---
 
