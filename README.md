@@ -18,7 +18,6 @@
 
 * Python 3.10 یا بالاتر
 * pip
-* SQLite یا PostgreSQL
 * وابستگی‌ها در فایل `requirements.txt`
 
 ---
@@ -100,7 +99,6 @@ sudo systemctl enable --now shahmoradi.service
 | `events.py`   | مدیریت رویدادها و منطق پاسخ       |
 | `ai.py`       | ماژول هوش مصنوعی و پاسخ خودکار    |
 | `betting.py`  | منطق سیستم شرط‌بندی               |
-| `box_game.py` | ماژول بازی جعبه                   |
 
 ---
 
