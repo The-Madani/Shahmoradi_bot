@@ -154,4 +154,4 @@ journalctl -u shahmoradi -f
 ## لایسنس
 
 📄 Licensed under the [GPL-3.0 License](https://www.gnu.org/licenses/gpl-3.0.html) – free software, always open-source.  
-Copyright (C) 2025 Amir Madani
+Copyright (C) 2025 Amirhossein Madani
