@@ -1,50 +1,62 @@
-# Shahmoradi_bot
+Shahmoradi_bot
 
 ربات تلگرام شاهمرادی — طراحی‌شده با پایتون، ساختار ماژولار، مقیاس‌پذیر و قابل توسعه برای پروژه‌های پیشرفته تلگرامی.
 
----
-
-## ویژگی‌ها
-
-* معماری ماژولار و قابل توسعه
-* پشتیبانی از ماژول‌های بازی، شرط‌بندی و هوش مصنوعی
-* مدیریت کاربران و داده‌ها با دیتابیس
-* قابل اجرا روی سرور لینوکس و سازگار با systemd یا Docker
-* ساختار تمیز و آماده برای توسعه بلندمدت
 
 ---
 
-## پیش‌نیازها
+ویژگی‌ها
 
-* Python 3.10 یا بالاتر
-* pip
-* وابستگی‌ها در فایل `requirements.txt`
+معماری ماژولار و قابل توسعه
+
+پشتیبانی از ماژول‌های بازی، شرط‌بندی و هوش مصنوعی
+
+مدیریت کاربران و داده‌ها با دیتابیس
+
+قابل اجرا روی سرور لینوکس و سازگار با systemd یا Docker
+
+ساختار تمیز و آماده برای توسعه بلندمدت
+
+
 
 ---
 
-## نصب و راه‌اندازی
+پیش‌نیازها
 
-### 1. کلون و ورود به پوشه
+Python 3.10 یا بالاتر
 
-```bash
+pip
+
+SQLite یا PostgreSQL
+
+وابستگی‌ها در فایل requirements.txt
+
+
+
+---
+
+نصب و راه‌اندازی
+
+1. کلون و ورود به پوشه
+
 git clone https://github.com/The-Madani/Shahmoradi_bot.git
 cd Shahmoradi_bot
-```
+
 2. ساخت محیط مجازی و نصب وابستگی‌ها
-```bash
+
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-```
+
 3. پیکربندی
 
 در فایل .env یا config.py مقادیر زیر را تنظیم کنید:
-```python
+
 BOT_TOKEN="توکن_ربات"
 ADMIN_IDS="123456789,987654321"
 DATABASE_URL="sqlite:///data.db"
 LOG_LEVEL="INFO"
-```
+
 4. اجرا
 
 python main.py
@@ -55,7 +67,7 @@ python main.py
 اجرای خودکار با systemd
 
 فایل زیر را در مسیر /etc/systemd/system/shahmoradi.service ایجاد کنید:
-```bash
+
 [Unit]
 Description=Shahmoradi Telegram Bot
 After=network.target
@@ -70,12 +82,12 @@ RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
-```
+
 سپس:
-```bash
+
 sudo systemctl daemon-reload
 sudo systemctl enable --now shahmoradi.service
-```
+
 
 ---
 
@@ -103,6 +115,7 @@ box_game.py	ماژول بازی جعبه
 /start	آغاز و ثبت کاربر
 /help	نمایش فهرست دستورات
 /bet <amount>	ثبت شرط
+/box	اجرای بازی جعبه
 /ai <question>	پرسش از ماژول هوش مصنوعی
 
 
