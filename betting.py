@@ -8,10 +8,13 @@ from database import (
 )
 import random
 
+# دیتاهای موقت برای شرط‌های بین کاربری
+user_vs_user_bets = {}  # {bet_id: {"creator": user_id, "amount": int, "message_id": int, "chat_id": int}}
+
 # ========== دستورات شرط‌بندی ==========
 
 async def bet_command(client, message: Message):
-    """شروع شرط‌بندی"""
+    """شروع شرط‌بندی - انتخاب نوع"""
     user = message.from_user
     chat_id = message.chat.id
     
@@ -47,7 +50,53 @@ async def bet_command(client, message: Message):
         await message.reply(f"❌ امتیاز کافی ندارید! امتیاز شما: {user_points}")
         return
     
-    # نمایش گزینه‌های شرط
+    # انتخاب نوع شرط‌بندی با دکمه‌های شیشه‌ای
+    keyboard = InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("🎲 شرط با تاس", callback_data=f"bettype_dice_{amount}"),
+        ],
+        [
+            InlineKeyboardButton("👥 شرط با کاربران", callback_data=f"bettype_users_{amount}"),
+        ],
+        [
+            InlineKeyboardButton("❌ لغو", callback_data="bettype_cancel")
+        ]
+    ])
+    
+    await message.reply(
+        f"💎 **شرط‌بندی با {amount} امتیاز**\n\n"
+        f"🎯 نوع شرط‌بندی خود را انتخاب کنید:\n\n"
+        f"🎲 **تاس:** شما تاس می‌زنید و بر اساس نتیجه برنده می‌شوید\n"
+        f"👥 **کاربران:** با یک کاربر دیگر شرط می‌بندید (50-50)\n\n"
+        f"💰 امتیاز شما: **{user_points}**",
+        reply_markup=keyboard
+    )
+
+
+async def handle_bettype_callback(client, callback_query: CallbackQuery):
+    """مدیریت انتخاب نوع شرط‌بندی"""
+    user = callback_query.from_user
+    data = callback_query.data
+    
+    if data == "bettype_cancel":
+        await callback_query.edit_message_text("❌ شرط‌بندی لغو شد.")
+        return
+    
+    parts = data.split("_")
+    bet_type = parts[1]  # dice یا users
+    amount = int(parts[2])
+    
+    if bet_type == "dice":
+        # نمایش گزینه‌های شرط با تاس
+        await show_dice_bet_options(client, callback_query, amount)
+    
+    elif bet_type == "users":
+        # ایجاد شرط بین کاربری
+        await create_user_vs_user_bet(client, callback_query, amount)
+
+
+async def show_dice_bet_options(client, callback_query: CallbackQuery, amount: int):
+    """نمایش گزینه‌های شرط با تاس"""
     keyboard = InlineKeyboardMarkup([
         [
             InlineKeyboardButton("🟢 زوج (×2)", callback_data=f"bet_even_{amount}"),
@@ -70,8 +119,8 @@ async def bet_command(client, message: Message):
         [InlineKeyboardButton("❌ لغو", callback_data="bet_cancel")]
     ])
     
-    await message.reply(
-        f"🎲 **شرط‌بندی با {amount} امتیاز**\n\n"
+    await callback_query.edit_message_text(
+        f"🎲 **شرط‌بندی با تاس - {amount} امتیاز**\n\n"
         f"لطفاً نوع شرط خود را انتخاب کنید:\n\n"
         f"• زوج/فرد: ضریب {BET_CONFIG['multipliers']['even_odd']}\n"
         f"• عدد دقیق: ضریب {BET_CONFIG['multipliers']['exact']}\n"
@@ -80,8 +129,185 @@ async def bet_command(client, message: Message):
     )
 
 
+async def create_user_vs_user_bet(client, callback_query: CallbackQuery, amount: int):
+    """ایجاد شرط بین دو کاربر"""
+    user = callback_query.from_user
+    chat_id = callback_query.message.chat.id
+    
+    # بررسی امتیاز کاربر
+    user_points = get_user_points(user.id)
+    if user_points < amount:
+        await callback_query.answer(f"❌ امتیاز کافی ندارید!", show_alert=True)
+        return
+    
+    # کسر امتیاز از ایجادکننده
+    remove_points(user.id, amount)
+    
+    # ایجاد شناسه یکتا
+    from datetime import datetime
+    bet_id = f"uvs_{chat_id}_{user.id}_{int(datetime.now().timestamp())}"
+    
+    # ذخیره اطلاعات شرط
+    user_vs_user_bets[bet_id] = {
+        "creator": user.id,
+        "creator_name": user.first_name or "کاربر",
+        "amount": amount,
+        "chat_id": chat_id,
+        "status": "waiting"
+    }
+    
+    # دکمه شیشه‌ای برای پذیرش شرط
+    keyboard = InlineKeyboardMarkup([
+        [InlineKeyboardButton("✨ قبول می‌کنم! ✨", callback_data=f"acceptbet_{bet_id}")],
+        [InlineKeyboardButton("❌ لغو شرط", callback_data=f"canceluserbet_{bet_id}")]
+    ])
+    
+    await callback_query.edit_message_text(
+        f"🎲 **شرط‌بندی بین کاربری**\n\n"
+        f"🎯 ایجادکننده: {user.mention}\n"
+        f"💰 مبلغ شرط: **{amount}** امتیاز\n"
+        f"🎁 جایزه برنده: **{amount * 2}** امتیاز\n"
+        f"📊 احتمال برد: **50%**\n\n"
+        f"⏳ منتظر یک شرکت‌کننده...\n\n"
+        f"💡 **توجه:** فقط کاربری که امتیاز کافی دارد می‌تواند شرکت کند!",
+        reply_markup=keyboard
+    )
+
+
+async def handle_accept_bet(client, callback_query: CallbackQuery):
+    """مدیریت پذیرش شرط توسط کاربر دوم"""
+    user = callback_query.from_user
+    data = callback_query.data
+    bet_id = data.split("_", 1)[1]
+    
+    # بررسی وجود شرط
+    if bet_id not in user_vs_user_bets:
+        await callback_query.answer("❌ این شرط منقضی شده یا دیگر موجود نیست!", show_alert=True)
+        return
+    
+    bet_info = user_vs_user_bets[bet_id]
+    
+    # بررسی اینکه خود ایجادکننده نباشد
+    if user.id == bet_info["creator"]:
+        await callback_query.answer("❌ شما نمی‌توانید در شرط خودتان شرکت کنید!", show_alert=True)
+        return
+    
+    # بررسی اینکه شرط هنوز در انتظار است
+    if bet_info["status"] != "waiting":
+        await callback_query.answer("❌ این شرط قبلاً تکمیل شده!", show_alert=True)
+        return
+    
+    # بررسی امتیاز کاربر دوم
+    user_points = get_user_points(user.id)
+    if user_points < bet_info["amount"]:
+        await callback_query.answer(
+            f"❌ امتیاز کافی ندارید! نیاز: {bet_info['amount']} | دارید: {user_points}",
+            show_alert=True
+        )
+        return
+    
+    # کسر امتیاز از کاربر دوم
+    remove_points(user.id, bet_info["amount"])
+    
+    # تغییر وضعیت به "در حال پردازش"
+    bet_info["status"] = "processing"
+    bet_info["accepter"] = user.id
+    bet_info["accepter_name"] = user.first_name or "کاربر"
+    
+    # انتخاب تصادفی برنده
+    winner_id = random.choice([bet_info["creator"], user.id])
+    loser_id = user.id if winner_id == bet_info["creator"] else bet_info["creator"]
+    
+    winner_name = bet_info["creator_name"] if winner_id == bet_info["creator"] else bet_info["accepter_name"]
+    loser_name = bet_info["accepter_name"] if winner_id == bet_info["creator"] else bet_info["creator_name"]
+    
+    # اعطای جایزه به برنده
+    total_prize = bet_info["amount"] * 2
+    add_points(winner_id, total_prize)
+    
+    # بررسی لول‌اپ برنده
+    level_up_info = check_level_up(winner_id)
+    winner_level = get_user_level(winner_id)
+    winner_points = get_user_points(winner_id)
+    
+    loser_level = get_user_level(loser_id)
+    loser_points = get_user_points(loser_id)
+    
+    # متن نتیجه
+    result_text = f"""🎊 **نتیجه شرط‌بندی**
+
+🎲 انتخاب تصادفی انجام شد...
+
+{'🏆' * 20}
+
+✨ **برنده:** [{winner_name}](tg://user?id={winner_id})
+💎 جایزه: **+{total_prize}** امتیاز
+💰 امتیاز جدید: **{winner_points}**
+📊 {winner_level['badge']} لول {winner_level['level_num']}
+
+{'➖' * 20}
+
+😔 **بازنده:** [{loser_name}](tg://user?id={loser_id})
+💸 ضرر: **-{bet_info['amount']}** امتیاز
+💰 امتیاز جدید: **{loser_points}**
+📊 {loser_level['badge']} لول {loser_level['level_num']}"""
+    
+    # اگر برنده لول‌اپ شد
+    if level_up_info["level_up"]:
+        result_text += f"\n\n🎉 **تبریک به برنده!**\n"
+        result_text += f"{level_up_info['badge']} **لول‌اپ به لول {level_up_info['new_level']}: {level_up_info['level_title']}**"
+    
+    result_text += f"\n\n💫 *دفعه بعد شانس بیشتری خواهید داشت!*"
+    
+    # بروزرسانی پیام
+    await callback_query.edit_message_text(result_text)
+    
+    # حذف شرط از لیست
+    del user_vs_user_bets[bet_id]
+    
+    await callback_query.answer("🎊 نتیجه اعلام شد!", show_alert=False)
+
+
+async def handle_cancel_userbet(client, callback_query: CallbackQuery):
+    """لغو شرط بین کاربری توسط ایجادکننده"""
+    user = callback_query.from_user
+    data = callback_query.data
+    bet_id = data.split("_", 1)[1]
+    
+    # بررسی وجود شرط
+    if bet_id not in user_vs_user_bets:
+        await callback_query.answer("❌ این شرط منقضی شده!", show_alert=True)
+        return
+    
+    bet_info = user_vs_user_bets[bet_id]
+    
+    # فقط ایجادکننده می‌تواند لغو کند
+    if user.id != bet_info["creator"]:
+        await callback_query.answer("❌ فقط ایجادکننده می‌تواند شرط را لغو کند!", show_alert=True)
+        return
+    
+    # بررسی اینکه شرط هنوز در انتظار است
+    if bet_info["status"] != "waiting":
+        await callback_query.answer("❌ شرط در حال پردازش است و نمی‌توان لغو کرد!", show_alert=True)
+        return
+    
+    # برگشت امتیاز به ایجادکننده
+    add_points(bet_info["creator"], bet_info["amount"])
+    
+    # بروزرسانی پیام
+    await callback_query.edit_message_text(
+        f"❌ **شرط لغو شد**\n\n"
+        f"💰 {bet_info['amount']} امتیاز به [{bet_info['creator_name']}](tg://user?id={bet_info['creator']}) برگشت داده شد."
+    )
+    
+    # حذف شرط از لیست
+    del user_vs_user_bets[bet_id]
+    
+    await callback_query.answer("✅ شرط لغو شد و امتیاز برگشت داده شد!", show_alert=False)
+
+
 async def handle_bet_callback(client, callback_query: CallbackQuery):
-    """مدیریت انتخاب نوع شرط"""
+    """مدیریت انتخاب نوع شرط با تاس"""
     user = callback_query.from_user
     data = callback_query.data
     
@@ -267,6 +493,24 @@ async def dice_handler(client, message: Message):
             
             await message.reply(text)
 
+
+# ========== تابع ثبت callback ها ==========
+# این تابع باید در main.py فراخوانی شود
+
+async def register_bet_callbacks(app):
+    """ثبت تمام callback های مربوط به شرط‌بندی"""
+    
+    @app.on_callback_query(filters.regex(r"^bettype_"))
+    async def bettype_callback_handler(client, callback_query):
+        await handle_bettype_callback(client, callback_query)
+    
+    @app.on_callback_query(filters.regex(r"^acceptbet_"))
+    async def acceptbet_callback_handler(client, callback_query):
+        await handle_accept_bet(client, callback_query)
+    
+    @app.on_callback_query(filters.regex(r"^canceluserbet_"))
+    async def canceluserbet_callback_handler(client, callback_query):
+        await handle_cancel_userbet(client, callback_query)
 
 # ========== پایان فایل ==========
 # هندلرها در main.py ثبت می‌شوند
