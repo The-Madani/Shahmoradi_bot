@@ -60,6 +60,19 @@ async def cancelbet_handler(client, message):
 async def mybets_handler(client, message):
     await betting.mybets_command(client, message)
 
+# ثبت callback های شرط‌بندی
+@app.on_callback_query(filters.regex(r"^bettype_"))
+async def bettype_callback_handler(client, callback_query):
+    await betting.handle_bettype_callback(client, callback_query)
+
+@app.on_callback_query(filters.regex(r"^acceptbet_"))
+async def acceptbet_callback_handler(client, callback_query):
+    await betting.handle_accept_bet(client, callback_query)
+
+@app.on_callback_query(filters.regex(r"^canceluserbet_"))
+async def canceluserbet_callback_handler(client, callback_query):
+    await betting.handle_cancel_userbet(client, callback_query)
+
 @app.on_callback_query(filters.regex(r"^bet_"))
 async def bet_callback_handler(client, callback_query):
     await betting.handle_bet_callback(client, callback_query)
@@ -104,7 +117,8 @@ if __name__ == "__main__":
     print("=" * 50)
     print(f"📊 Level System: {len(LEVEL_CONFIG)} levels")
     print(f"🎲 Betting System: Active")
-    print(f"   └─ Min Bet: {BET_CONFIG['min_bet']} | Max Bet: {BET_CONFIG['max_bet']}")
+    print(f"   ├─ Dice Betting: Min {BET_CONFIG['min_bet']} | Max {BET_CONFIG['max_bet']}")
+    print(f"   └─ User vs User: 50-50 chance")
     print(f"📦 Box System: Every {BOX_CONFIG['message_threshold']} messages")
     print(f"   └─ Reward: {BOX_CONFIG['min_reward']}-{BOX_CONFIG['max_reward']} points")
     print(f"🤖 AI System: Gemini 2.5 Flash")
