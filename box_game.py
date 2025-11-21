@@ -90,7 +90,7 @@ async def auto_box_handler(client, message: Message):
         # ارسال سوال
         await client.send_message(
             chat_id,
-            f"🎁 **جعبه شانس!**\n\n❓ پاسخ `{num_1} {operation} {num_2}` چند میشود؟",
+            f"🎁 **جعبه شانس!**\n\n❓ پاسخ `{num_2} {operation} {num_1}` چند میشود؟",
             reply_markup=keyboard
         )
         
