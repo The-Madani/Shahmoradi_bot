@@ -486,8 +486,8 @@ tail -f nohup.out
 * 📖 [مستندات کامل Wiki](https://github.com/The-Madani/Shahmoradi_bot/wiki)
 * 💬 [بخش Discussions](https://github.com/The-Madani/Shahmoradi_bot/discussions)
 * 🐛 [گزارش مشکل (Issues)](https://github.com/The-Madani/Shahmoradi_bot/issues)
-* 📧 ایمیل: your.email@example.com
-* 💬 تلگرام: [@YourUsername](https://t.me/YourUsername)
+* 📧 ایمیل: khode.madani@gmail.com
+* 💬 تلگرام: [@The_Madani](https://t.me/The_Madani)
 
 ---
 
@@ -496,8 +496,7 @@ tail -f nohup.out
 **Amirhossein Madani**
 
 * 🌐 GitHub: [@The-Madani](https://github.com/The-Madani)
-* 📧 Email: your.email@example.com
-* 💼 LinkedIn: [Your LinkedIn](https://linkedin.com/in/yourprofile)
+* 📧 Email: khode.madani@gmail.com
 
 ---
 
